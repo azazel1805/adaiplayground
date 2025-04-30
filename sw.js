@@ -19,14 +19,20 @@ self.addEventListener('install', event => {
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('Service Worker: Caching app shell');
+                // Use addAll - it fetches and caches in one step.
+                // It rejects if any of the fetches fail.
                 return cache.addAll(urlsToCache);
             })
             .then(() => {
-                console.log('Service Worker: Installation complete');
-                return self.skipWaiting(); // Activate worker immediately
+                console.log('Service Worker: App Shell Caching complete.');
+                // Force the waiting service worker to become the active service worker.
+                return self.skipWaiting();
             })
             .catch(error => {
-                console.error('Service Worker: Caching failed', error);
+                // Log the error but installation might still partially succeed
+                // depending on which asset failed.
+                console.error('Service Worker: Caching failed during install', error);
+                // Optionally, prevent activation if core assets fail? For now, just log.
             })
     );
 });
@@ -45,72 +51,99 @@ self.addEventListener('activate', event => {
                 })
             );
         }).then(() => {
-             console.log('Service Worker: Activation complete');
-             return self.clients.claim(); // Take control of existing clients
+             console.log('Service Worker: Activation complete, claiming clients.');
+             // Ensure the activated worker takes control of the page immediately.
+             return self.clients.claim();
         })
     );
 });
 
 // Fetch event: Serve cached assets, fallback to network, provide offline page
 self.addEventListener('fetch', event => {
-    // We only want to intercept navigation requests and potentially API calls
-    // Let's focus on serving cached assets and an offline page for navigation
-
     const requestUrl = new URL(event.request.url);
 
-    // For API calls (/api/generate), always go to network. AI needs to be live.
+    // --- Strategy: Network First for API calls ---
+    // Always try the network for API calls. If it fails, return a simple error response.
     if (requestUrl.pathname.startsWith('/api/')) {
-        event.respondWith(fetch(event.request));
-        return;
+        event.respondWith(
+            fetch(event.request)
+            .catch(error => {
+                console.error('Service Worker: API fetch failed:', error);
+                // Return a synthetic error response (JSON format matching backend errors)
+                return new Response(JSON.stringify({ error: 'Network error: Could not reach API.' }), {
+                    status: 503, // Service Unavailable
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            })
+        );
+        return; // Don't process further for API calls
     }
 
-    // For other GET requests (pages, static assets)
+    // --- Strategy: Cache First, Fallback to Network (then Offline Page for Nav) for GET requests ---
     if (event.request.method === 'GET') {
-         event.respondWith(
+
+        // --- Skip non-web schemes (like chrome-extension://) ---
+        if (!['http:', 'https:'].includes(requestUrl.protocol)) {
+            // console.log(`SW: Ignoring non-http(s) request: ${requestUrl.protocol}`);
+            // Let the browser handle it normally by not calling respondWith
+            return;
+        }
+
+        // --- Handle web requests (HTML pages, CSS, JS, images etc.) ---
+        event.respondWith(
             caches.match(event.request)
                 .then(cachedResponse => {
-                    // Cache hit - return response
+                    // 1. Cache Hit: Return cached response
                     if (cachedResponse) {
-                        // console.log('Service Worker: Serving from cache:', event.request.url);
+                        // console.log('SW: Serving from cache:', event.request.url);
                         return cachedResponse;
                     }
 
-                    // Not in cache - fetch from network
-                    // console.log('Service Worker: Fetching from network:', event.request.url);
+                    // 2. Cache Miss: Go to Network
+                    // console.log('SW: Fetching from network:', event.request.url);
                     return fetch(event.request).then(
-                        response => {
-                            // Check if we received a valid response
-                            if (!response || response.status !== 200 || response.type !== 'basic') {
-                                // Don't cache error responses or non-basic types (like opaque responses from CDNs)
-                                return response;
+                        networkResponse => {
+                            // Check if we received a valid response to cache
+                            // Don't cache errors (4xx, 5xx) or redirects (3xx) usually
+                            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                                // Return the non-cacheable response as is
+                                return networkResponse;
                             }
 
-                            // IMPORTANT: Clone the response. A response is a stream
-                            // and because we want the browser to consume the response
-                            // as well as the cache consuming the response, we need
-                            // to clone it so we have two streams.
-                            const responseToCache = response.clone();
+                            // Clone the response because it needs to be used by browser and cache
+                            const responseToCache = networkResponse.clone();
 
+                            // Cache the newly fetched resource
                             caches.open(CACHE_NAME)
                                 .then(cache => {
-                                     // console.log('Service Worker: Caching new resource:', event.request.url);
+                                    // console.log('SW: Caching new resource:', event.request.url);
                                     cache.put(event.request, responseToCache);
                                 });
 
-                            return response;
+                            // Return the original network response to the browser
+                            return networkResponse;
                         }
                     ).catch(error => {
-                         // Network request failed, try serving offline page for navigation requests
-                        console.log('Service Worker: Network fetch failed for:', event.request.url, error);
-                        // Only serve offline page for navigation requests (HTML pages)
+                         // 3. Network Failed: Serve Offline Fallback (for navigation requests only)
+                        console.log('SW: Network fetch failed for:', event.request.url, error);
+
+                        // Only serve the offline page for navigating to HTML pages
                         if (event.request.mode === 'navigate') {
-                            console.log('Service Worker: Serving offline page.');
+                            console.log('SW: Serving offline fallback page.');
                             return caches.match('/offline.html');
                         }
-                        // For other asset types (CSS, JS), just let the error propagate
-                        // so the browser shows its default offline behavior for those assets.
+
+                        // For other failed assets (CSS, JS, images), let the browser handle the error
+                        // Returning undefined here will result in the browser's default behavior
+                        // (e.g., broken image icon, style not applied).
+                        return undefined;
                     });
                 })
-        );
-    }
-});
+        ); // end event.respondWith
+    } // end if GET request
+
+    // else: For non-GET requests (POST, PUT, etc.) that weren't API calls,
+    // just let the browser handle them by default (don't call respondWith).
+    // console.log(`SW: Ignoring non-GET request: ${event.request.method} ${event.request.url}`);
+
+}); // end fetch event listener
