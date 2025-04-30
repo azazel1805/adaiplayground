@@ -1,0 +1,294 @@
+/* --- Base & Theme --- */
+:root {
+    --bg-color: #1a1a1a; /* Very dark grey */
+    --text-color: #e0e0e0; /* Light grey */
+    --primary-color: #bb86fc; /* Purple (like Gemini's examples) */
+    --secondary-color: #03dac6; /* Teal */
+    --accent-color: #cf6679; /* Muted red/pink for contrast/error */
+    --surface-color: #2c2c2c; /* Slightly lighter dark grey for cards/boxes */
+    --border-color: #444;
+    --placeholder-color: #777;
+    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-fancy: 'Creepster', cursive; /* Example spooky font - include @import */
+}
+
+/* Import a spooky/quirky font (optional) - Add to top of file */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-main);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1, h2 {
+    /* Use the fancy font for headers if desired */
+    /* font-family: var(--font-fancy); */
+    /* letter-spacing: 2px; */
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 0.5em;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-top: 1em;
+}
+
+h2 {
+    font-size: 1.8rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3em;
+    margin-top: 1.5em; /* Add space above tab titles */
+}
+
+p {
+    margin-bottom: 1em;
+}
+
+a {
+    color: var(--secondary-color);
+}
+
+/* --- Layout & Structure --- */
+header, main, footer {
+    width: 90%;
+    max-width: 800px;
+    margin: 1em auto;
+    padding: 1em;
+}
+
+header {
+    text-align: center;
+    border-bottom: 2px dashed var(--primary-color);
+}
+
+main {
+    flex-grow: 1; /* Pushes footer down */
+}
+
+footer {
+    text-align: center;
+    margin-top: 2em;
+    font-size: 0.9em;
+    color: var(--placeholder-color);
+    border-top: 1px solid var(--border-color);
+    padding-top: 1em;
+}
+
+/* --- Tabs --- */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab-button {
+    padding: 0.8em 1.5em;
+    margin: 0 0.3em -1px 0.3em; /* Overlap border */
+    cursor: pointer;
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: lighten(var(--surface-color), 5%);
+    color: var(--primary-color);
+}
+
+.tab-button.active {
+    background-color: var(--bg-color); /* Match main background */
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--bg-color); /* Hide bottom border */
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none; /* Hidden by default */
+    padding: 1.5em;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.tab-content.active {
+    display: block; /* Show active tab */
+}
+
+/* --- Game Elements --- */
+.game-box {
+    background-color: rgba(0,0,0, 0.2); /* Slightly darker inner box */
+    padding: 1.5em;
+    border-radius: 6px;
+    margin-top: 1em;
+    border: 1px dashed var(--border-color);
+}
+
+.placeholder {
+    color: var(--placeholder-color);
+    font-style: italic;
+}
+
+#fill-sentence, #situation-display {
+    font-size: 1.2em;
+    margin-bottom: 1em;
+    min-height: 1.5em; /* Prevent layout shifts */
+    background-color: var(--bg-color);
+    padding: 0.5em;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.story-output {
+    background-color: var(--bg-color);
+    padding: 1em;
+    border-radius: 4px;
+    margin-bottom: 1em;
+    min-height: 6em;
+    white-space: pre-wrap; /* Preserve line breaks */
+    overflow-y: auto;
+    max-height: 300px; /* Limit height */
+    border: 1px solid var(--border-color);
+}
+
+input[type="text"],
+textarea {
+    width: calc(100% - 22px); /* Account for padding/border */
+    padding: 10px;
+    margin-bottom: 1em;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(187, 134, 252, 0.5);
+}
+
+input:disabled, textarea:disabled {
+    background-color: #333;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: var(--bg-color); /* Dark text on light button */
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button:hover:not(:disabled) {
+    background-color: lighten(var(--primary-color), 10%);
+}
+
+button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    background-color: var(--border-color);
+    color: var(--placeholder-color);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Secondary button style */
+button#fill-new, button#story-start, button#situation-new, #installButton {
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: 1px solid var(--secondary-color);
+}
+button#fill-new:hover:not(:disabled),
+button#story-start:hover:not(:disabled),
+button#situation-new:hover:not(:disabled),
+#installButton:hover:not(:disabled) {
+    background-color: rgba(3, 218, 198, 0.1); /* Teal transparent */
+    color: lighten(var(--secondary-color), 10%);
+}
+
+
+.feedback-area {
+    margin-top: 1.5em;
+    padding: 1em;
+    background-color: rgba(0,0,0, 0.3);
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 4px;
+    min-height: 2em; /* Prevent jumpiness */
+    font-style: italic;
+    color: #c0c0c0; /* Slightly brighter than main text */
+}
+
+.feedback-area.correct {
+    border-left-color: #66bb6a; /* Green */
+    color: #a5d6a7;
+}
+
+.feedback-area.incorrect {
+    border-left-color: var(--accent-color); /* Reddish */
+    color: #ef9a9a;
+}
+
+.feedback-area.info { /* For general AI feedback */
+     border-left-color: var(--secondary-color); /* Teal */
+     color: var(--text-color);
+     font-style: normal; /* Normal style for AI feedback */
+}
+
+.feedback-area.error {
+    border-left-color: var(--accent-color); /* Reddish */
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+
+/* --- Loader --- */
+.loader {
+    text-align: center;
+    margin-top: 1em;
+    font-size: 1.1em;
+    color: var(--primary-color);
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* --- Responsiveness --- */
+@media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .tabs { flex-wrap: wrap; } /* Allow tabs to wrap */
+    .tab-button { padding: 0.6em 1em; font-size: 0.9rem; }
+    header, main, footer { width: 95%; }
+    .game-box { padding: 1em; }
+}

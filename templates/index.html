@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2c2c2c"> <!-- Dark theme color -->
+    <title>ADAI Playground</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="manifest" href="{{ url_for('serve_manifest') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icons/icon-192x192.png') }}">
+    <!-- Add more icons for PWA if needed -->
+</head>
+<body>
+    <header>
+        <h1>ADAI Playground</h1>
+        <p>Your Slightly Twisted Portal to English Fun</p>
+    </header>
+
+    <main>
+        <nav class="tabs">
+            <button class="tab-button active" data-tab="grim-fill">Grim Fill-Ins</button>
+            <button class="tab-button" data-tab="story-weaver">Story Weaver</button>
+            <button class="tab-button" data-tab="odd-situations">Odd Situations</button>
+        </nav>
+
+        <div id="game-area">
+            <!-- Grim Fill-Ins Tab -->
+            <div id="grim-fill" class="tab-content active">
+                <h2>Grim Fill-Ins</h2>
+                <p>Complete the sentence with a fitting word. Think dark, funny, or just plain weird.</p>
+                <div class="game-box">
+                    <p id="fill-sentence" class="placeholder">Click 'Get Sentence' to start...</p>
+                    <input type="text" id="fill-input" placeholder="Your word here..." disabled>
+                    <button id="fill-submit" disabled>Check Answer</button>
+                    <button id="fill-new">Get New Sentence</button>
+                </div>
+                <div id="fill-feedback" class="feedback-area"></div>
+                <div id="fill-loader" class="loader" style="display: none;">Thinking...</div>
+            </div>
+
+            <!-- Story Weaver Tab -->
+            <div id="story-weaver" class="tab-content">
+                <h2>Story Weaver</h2>
+                <p>Let's write a strange little tale together. Add a sentence to continue the story.</p>
+                <div class="game-box">
+                    <div id="story-display" class="story-output placeholder">Click 'Start Story' to begin...</div>
+                    <textarea id="story-input" rows="3" placeholder="Your sentence..." disabled></textarea>
+                    <button id="story-submit" disabled>Add My Part</button>
+                    <button id="story-start">Start New Story</button>
+                </div>
+                 <div id="story-feedback" class="feedback-area"></div> <!-- Optional feedback area -->
+                <div id="story-loader" class="loader" style="display: none;">Weaving words...</div>
+            </div>
+
+            <!-- Odd Situations Tab -->
+            <div id="odd-situations" class="tab-content">
+                <h2>Odd Situations</h2>
+                <p>How would you react? Describe your response to the peculiar scenario.</p>
+                <div class="game-box">
+                    <p id="situation-display" class="placeholder">Click 'Get Situation' to start...</p>
+                    <textarea id="situation-input" rows="4" placeholder="How do you react?" disabled></textarea>
+                    <button id="situation-submit" disabled>Submit Reaction</button>
+                    <button id="situation-new">Get New Situation</button>
+                </div>
+                <div id="situation-feedback" class="feedback-area"></div>
+                <div id="situation-loader" class="loader" style="display: none;">Brewing oddness...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>ADAI Playground - Where English practice gets weirdly wonderful.</p>
+        <!-- Install button for PWA -->
+        <button id="installButton" style="display: none;">Install App</button>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/pwa.js') }}"></script>
+</body>
+</html>
