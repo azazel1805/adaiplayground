@@ -159,26 +159,31 @@ def generate_content():
     # --- Game Logic & Prompts ---
     if game_mode == 'grim-fill':
         prompt = f"""
-        Create a single, grammatically correct sentence for an intermediate English learner (B1-B2 level) with a dark humor, slightly spooky, or absurdly funny tone.
-        The sentence MUST contain exactly one blank represented by '_____' where a common English word (verb, noun, adjective, adverb) should go.
-        Provide the sentence and the missing word.
-        Your response MUST be ONLY a valid JSON object with keys "sentence" and "word".
-        Do NOT include any introductory text, explanations, markdown formatting like ```json, or anything else outside the JSON structure.
+        You are an AI assistant skilled in creating darkly humorous, absurd, and surprisingly weird sentences for intermediate English learners (B1-B2 level).
+        Your goal is to generate a SINGLE, grammatically correct sentence containing EXACTLY ONE blank ('_____'). This blank should replace a SINGLE common English word (noun, verb, adjective, or adverb).
+        The sentence MUST evoke dark humor, surrealism, unexpectedness, or absurdity.
 
-        Example VALID response:
-        {{
-          "sentence": "The skeletal librarian insisted the overdue book fee was payable in ____.",
-          "word": "souls"
-        }}
+        **CRITICAL INSTRUCTIONS:**
+        1.  **TONE:** Aim for genuinely funny-weird, macabre-lite, ironic, or nonsensical. Think unexpected juxtapositions.
+        2.  **VARIETY:** DO NOT always use the same sentence structure. Vary sentence beginnings, use different clauses, maybe even a question format sometimes. Surprise the user!
+        3.  **AVOID:** Do not create boring, predictable, bland, or overly simple sentences. Avoid generic situations. If it feels plain, try again.
+        4.  **BLANK:** Only ONE blank ('_____') representing ONE common English word.
+        5.  **OUTPUT:** Your response MUST be ONLY a valid JSON object with keys "sentence" and "word". NO introductory text, NO explanations, NO apologies, NO markdown formatting (like ```json). Just the JSON.
 
-        Example INVALID response (DO NOT DO THIS):
-        Here is the JSON you requested:
-        ```json
-        {{
-          "sentence": "...",
-          "word": "..."
-        }}
-        ```
+        **GOOD Examples (Demonstrating Tone & Variety):**
+        {{ "sentence": "My therapist suggested I embrace my inner child, so I promptly _____ it in the attic.", "word": "locked" }}
+        {{ "sentence": "The polite zombie offered me a cup of tea, brewed with questionable _____.", "word": "water" }}
+        {{ "sentence": "To save money on haunting costs, the ghost decided to _____ less dramatically.", "word": "materialize" }}
+        {{ "sentence": "His dating profile listed 'taxidermy' and '_____ snacks' as his main hobbies.", "word": "existential" }}
+        {{ "sentence": "Is it considered rude to _____ during a séance?", "word": "multitask" }}
+        {{ "sentence": "The sentient toaster oven demanded _____ before making breakfast.", "word": "fealty" }}
+
+        **BAD Examples (Too Bland / Not Weird Enough):**
+        {{ "sentence": "The black cat sat on the ____.", "word": "mat" }}
+        {{ "sentence": "He felt ____ after the long walk.", "word": "tired" }}
+        {{ "sentence": "The house on the hill looked ____.", "word": "spooky" }}
+
+        Generate a new sentence following these instructions precisely.
         """
         ai_response_raw = call_gemini(prompt)
 
